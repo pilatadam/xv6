@@ -7,6 +7,7 @@
 //   control-u -- kill line
 //   control-d -- end of file
 //   control-p -- print process list
+//   control-l -- clear terminal
 //
 
 #include <stdarg.h>
@@ -51,6 +52,15 @@ struct {
   uint w;  // Write index
   uint e;  // Edit index
 } cons;
+
+void
+consoleclear(void)
+{
+  char* buf = "\033[2J\033[1;1H\0";
+  while (*buf) { consputc(*buf++); }
+  consputc('$');
+  consputc(' ');
+}
 
 //
 // user write()s to the console go here.
@@ -138,6 +148,9 @@ consoleintr(int c)
   acquire(&cons.lock);
 
   switch(c){
+  case C('L'): // Clear terminal window
+    consoleclear();
+    break;
   case C('P'):  // Print process list.
     procdump();
     break;

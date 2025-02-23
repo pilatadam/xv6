@@ -22,3 +22,4 @@ search path, you can run "make qemu".
 Added features:
 [lab1] sleep
 [lab1] pingpong
+[*]    clear (both shell and C-l intr)
