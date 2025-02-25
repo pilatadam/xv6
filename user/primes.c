@@ -7,30 +7,43 @@
 *   Make a new process and share
 *   reading end of the pipe for 
 *   the parent process
+*
+*   @param ppipe Read end of the pipe through
+*   which parent reads numbers
 */
-void neighbour(int ppipe) __attribute__((noreturn));
+void
+pipeparse(int ppipe) __attribute__((noreturn));
 
-void init(void);
+/*
+*   Inicialize the first pipeline through
+*   which parent process writes LENGTH numbers
+*
+*   @return Read end of the pipe
+*/
+int
+pipeinit(void);
 
 int
 main(int argc, char* argv[])
 {
-    
-    init();
+    int ppipe = pipeinit();
+    pipeparse(ppipe);
     exit(0);
 }
 
 void
-neighbour(int ppipe)
+pipeparse(int ppipe)
 {
-
     int p[2];
-    pipe(p);
+    if (pipe(p) == -1) {
+        printf("Error: pipeparse pipe() failed\n");
+        exit(1);
+    }
 
     int start;
     int received;
 
-    int created = 0;
+    int forked = 0;
     int pid;
 
     read(ppipe, &start, sizeof(int));
@@ -40,36 +53,52 @@ neighbour(int ppipe)
     {
         if (received % start != 0) {
             write(p[1], &received, sizeof(int));
-            if (!created)
+            if (!forked)
             {
-                created = 1;
+                forked = 1;
                 pid = fork();
+
+                if (pid == -1) {
+                    printf("Error: pipeparse fork() failed\n");
+                    close(ppipe);
+                    close(p[1]);
+                    exit(1);
+                }
                 if (pid == 0)
                 {
                     close(ppipe);
                     close(p[1]);
-                    neighbour(p[0]);
+                    pipeparse(p[0]);
                 }
+                else { close(p[0]); }
             }
         }
     }
 
     close(ppipe);
     close(p[1]);
-    if (created) { wait(0); }
+    if (forked) { wait(0); }
     exit(0);
 }
 
-void init(void)
+int 
+pipeinit(void)
 {
     int p[2];
     pipe(p);
 
     int pid = fork();
 
+    if (pid == -1) {
+        printf("Error: pipeinit fork() failed\n");
+        close(p[0]);
+        close(p[1]);
+        exit(1);
+    }
+
     if (pid == 0) {
         close(p[1]);
-        neighbour(p[0]);
+        return p[0];
     }
     else {
         close(p[0]);
