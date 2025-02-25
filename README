@@ -20,6 +20,22 @@ riscv64-softmmu.  Once they are installed, and in your shell
 search path, you can run "make qemu".
 
 Added features:
-[lab1] sleep
-[lab1] pingpong
-[*]    clear (both shell and C-l intr)
+[labX] - Assignments for 6.1810
+[*]    - Additional features
+
+[lab1] sleep (user/sleep.c)
+-> User-level sleep program.
+-> Sleep pauses for a user-specified number of ticks.
+
+[lab1] pingpong (user/pingpong.c)
+-> User-level program that uses xv6 system calls to ''ping-pong'' a byte 
+   between two processes over a pair of pipes, one for each direction.
+
+[lab1] primes (user/primes.c)
+-> The sieve of Eratosthenes problem solved using CSP (Communicating Sequential Processes)
+   with pipes.
+-> More: https://swtch.com/~rsc/thread/
+
+[*]    clear
+-> Traditional terminal function to clear previous content.
+-> Works with C-l in terminal or as a sh function.
