@@ -39,3 +39,6 @@ Added features:
 [*]    clear
 -> Traditional terminal function to clear previous content.
 -> Works with C-l in terminal or as a sh function.
+
+[*]    uptime
+-> Prints the uptime in terms of ticks.
