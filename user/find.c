@@ -1,8 +1,4 @@
-#include "kernel/types.h"
-#include "kernel/stat.h"
-#include "user/user.h"
-#include "kernel/fs.h"
-#include "kernel/fcntl.h"
+#include "find.h"
 
 int
 main(int argc, char* argv[])
@@ -12,16 +8,26 @@ main(int argc, char* argv[])
 }
 
 void
-find(char *path, char *needle)
+find(struct dirent de, char *needle)
 {
     int fd;
     struct dirent de;
     struct stat st;
 
-    if((fd = open(path, O_RDONLY)) < 0){
-        fprintf(2, "find: cannot open %s\n", path);
-        return;
-    }
+    // if((fd = open(path, O_RDONLY)) < 0){
+    //     fprintf(2, "find: cannot open %s\n", path);
+    //     return;
+    // }
+    //
+    // if(fstat(fd, &st) < 0){
+    //   fprintf(2, "ls: cannot stat %s\n", path);
+    //   close(fd);
+    //   return;
+    // }
+}
 
-    
+int
+is_valid_dir(char *path)
+{
+  return strcmp(path, ".") != 0 && strcmp(path, "..") != 0;
 }
