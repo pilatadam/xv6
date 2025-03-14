@@ -3,6 +3,22 @@
 int
 main(int argc, char* argv[])
 {
+    if (argc != 3){
+      fprintf(2, "Usage: find [dir] [file]\n");
+    }
+
+    struct stat st;
+
+    if(stat(argv[1], &st) < 0){
+      printf("ls: cannot stat %s\n", argv[1]);
+      exit(1);
+    }
+
+    if(st.type != T_DIR){
+      fprintf(2, "Error: First argument must be a valid directory path!\n");
+      exit(1);
+    }
+
     find(argv[1], argv[2]);
     exit(0);
 }
@@ -22,7 +38,8 @@ find(char *path, char *needle)
 
     strcpy(buf, path);
     p = buf+strlen(buf);
-    *p++ = '/';
+    if(*(p-1) != '/')
+      *p++ = '/';
 
     while(read(fd, &de, sizeof(de)) == sizeof(de)){
       if(de.inum == 0)

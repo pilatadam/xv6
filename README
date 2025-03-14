@@ -36,9 +36,17 @@ Added features:
    with pipes.
 -> More: https://swtch.com/~rsc/thread/
 
+[lab1] find (user/find.c)
+-> Simple version of the UNIX find program
+-> Finds all the files in a directory tree with a specific name
+
 [*]    clear
 -> Traditional terminal function to clear previous content.
 -> Works with C-l in terminal or as a sh function.
 
 [*]    uptime
 -> Prints the uptime in terms of ticks.
+
+TO-DO:
+-> Add shell command history feature with arrows
+-> Print current working directory in shell
