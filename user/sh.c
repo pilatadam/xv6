@@ -13,9 +13,35 @@
 
 #define MAXARGS 10
 
+/**
+ * The limit for number of commands to be stored in
+ * cmdhist histbuf
+ */
+#define HISTLIMIT 5
+
 struct cmd {
   int type;
 };
+
+struct cmdnode {
+  char cmd[100];   /* Buffer storing the commnds */
+  struct cmdnode *prev;
+  struct cmdnode *next;
+};
+
+struct cmdhist {
+  struct cmdnode *head;
+  struct cmdnode *tail;
+  struct cmdnode *current;
+  int count;
+};
+
+struct cmdhist *cmdhistinit(void);
+int storecmd(struct cmdhist *hist, char *cmd);
+void addcmdnode(struct cmdhist *hist, struct cmdnode *node);
+struct cmdnode* cmdnodeinit(char *cmd);
+void freecmdhist(struct cmdhist *hist);
+
 
 struct execcmd {
   int type;
@@ -142,6 +168,107 @@ getcmd(char *buf, int nbuf)
   return 0;
 }
 
+/**
+ *  Initialize a doubly-linked list where
+ *  command history will be stored
+ *  @return Initialized dl list, 0 if error occured
+ */
+struct cmdhist *
+cmdhistinit(void) {
+  struct cmdhist *hist = malloc(sizeof(struct cmdhist));
+  if (hist == 0) {
+    fprintf(2, "Error: histinit malloc failed!\n");
+    return 0;
+  }
+  memset(hist, 0, sizeof(struct cmdhist));
+  return hist;
+}
+
+/**
+ *  Store the most recent command in the
+ *  doubly-linked list.
+ *  @param [hist] Pointer to the initialized dl list
+ *  @param [cmd] Array that points to the latest command
+ *  @return 1 when error ocured, 0 otherwise
+ */
+int
+storecmd(struct cmdhist *hist, char *cmd) {
+  struct cmdnode *node;
+  node = cmdnodeinit(cmd);
+  if (node == 0)
+    return 1;
+  
+  addcmdnode(hist, node);
+
+  return 0;
+}
+
+/**
+ *  Add the node to the end of the doubly-linked
+ *  list, or initialize the starting point.
+ *  @param [hist] Pointer to the dl list
+ *  @param [node] Node to be added
+ */
+void
+addcmdnode(struct cmdhist *hist, struct cmdnode *node) {
+  if (hist->head == 0) {
+    hist->head = node;
+    hist->tail = node;
+  }
+  else {
+    hist->tail->next = node;
+    node->prev = hist->tail;
+    hist->tail = node;
+  }
+  hist->count++;
+}
+
+/**
+ *  Initialize a node in the doubly-linked
+ *  list
+ *  @param [cmd] String that contains the command
+ *  @return Pointer to the node, 0 if error occured
+ */
+struct cmdnode*
+cmdnodeinit(char *cmd) {
+  struct cmdnode *node = malloc(sizeof(struct cmdnode));
+  if (node == 0) {
+    fprintf(2, "Error: cmdnode malloc failed!\n");
+    return 0;
+  }
+  strcpy(node->cmd, cmd);
+  node->prev = 0;
+  node->next = 0;
+  return node;
+}
+
+/**
+ *  Free the doubly-linked list that 
+ *  represents the command history
+ *  @param [hist] Pointer to the dl list
+ */
+void
+freecmdhist(struct cmdhist *hist) {
+  struct cmdnode *current = hist->head;
+  struct cmdnode *next;
+  while (current != 0) {
+    next = current->next;
+    free(current);
+    current = next;
+  }
+  free(hist);
+}
+
+void
+printcmdhist(struct cmdhist *hist) {
+  struct cmdnode *current = hist->head;
+  while (current != 0) {
+    printf("%s", current->cmd);
+    current = current->next;
+  }
+}
+
+
 int
 main(void)
 {
@@ -156,6 +283,12 @@ main(void)
     }
   }
 
+  struct cmdhist *hist = cmdhistinit();
+  if (hist == 0) {
+    close(fd);
+    exit(1);
+  }
+
   // Read and run input commands.
   while(getcmd(buf, sizeof(buf)) >= 0){
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
@@ -165,10 +298,15 @@ main(void)
         fprintf(2, "cannot cd %s\n", buf+3);
       continue;
     }
-    if(fork1() == 0)
+    storecmd(hist, buf);
+    printcmdhist(hist); 
+
+    if(fork1() == 0) {
       runcmd(parsecmd(buf));
+    }
     wait(0);
   }
+  freecmdhist(hist);
   exit(0);
 }
 
@@ -330,7 +468,6 @@ parsecmd(char *s)
 {
   char *es;
   struct cmd *cmd;
-
   es = s + strlen(s);
   cmd = parseline(&s, es);
   peek(&s, es, "");
