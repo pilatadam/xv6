@@ -40,12 +40,19 @@ Added features:
 -> Simple version of the UNIX find program
 -> Finds all the files in a directory tree with a specific name
 
-[*]    clear
+[*] clear
 -> Traditional terminal function to clear previous content.
 -> Works with C-l in terminal or as a sh function.
 
-[*]    uptime
+[*] uptime
 -> Prints the uptime in terms of ticks.
+
+[*] shell command history
+-> Store commands/calls passed to shell to a doubly-linked list structure
+   that keeps track of all recent commands.
+-> Retrieve them with arrow keys.
+-> Added provisory shell command "hls" to print all of them and run them by their
+   depth in the tree.
 
 TO-DO:
 -> Add shell command history feature with arrows

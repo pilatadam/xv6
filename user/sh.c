@@ -259,11 +259,34 @@ freecmdhist(struct cmdhist *hist) {
   free(hist);
 }
 
+/**
+ *  Provisory function that copies n'th last
+ *  command into the buffer buf
+ *  @param [hist] Pointer to the dl list
+ *  @param [buf] Pointer to the buffer to be filled
+ *  @param [n] Specifies the n'th last command to be copied,
+ *  if there is less than n commands in history, nothing will
+ *  happen.
+ */
+void
+gethistcmd(struct cmdhist *hist, char *buf, int n) {
+  printf("hist: %d, n: %d\n", hist->count, n);
+  if(hist->count < n)
+    return;
+  struct cmdnode *node = hist->tail;
+  while(n != 0) {
+    node = node->next;
+    n--;
+  }
+  strcpy(buf, node->cmd);
+}
+
 void
 printcmdhist(struct cmdhist *hist) {
   struct cmdnode *current = hist->head;
+  int i = 1;
   while (current != 0) {
-    printf("%s", current->cmd);
+    printf("[%d] %s", hist->count - i++, current->cmd);
     current = current->next;
   }
 }
@@ -291,6 +314,9 @@ main(void)
 
   // Read and run input commands.
   while(getcmd(buf, sizeof(buf)) >= 0){
+
+    storecmd(hist, buf);
+
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
       buf[strlen(buf)-1] = 0;  // chop \n
@@ -298,10 +324,10 @@ main(void)
         fprintf(2, "cannot cd %s\n", buf+3);
       continue;
     }
-    storecmd(hist, buf);
-    printcmdhist(hist); 
 
-    if(fork1() == 0) {
+    if(strcmp(buf, "hls\n") == 0)
+      printcmdhist(hist);
+    else if(fork1() == 0) {
       runcmd(parsecmd(buf));
     }
     wait(0);
