@@ -37,8 +37,13 @@ Added features:
 -> More: https://swtch.com/~rsc/thread/
 
 [lab1] find (user/find.c)
--> Simple version of the UNIX find program
--> Finds all the files in a directory tree with a specific name
+-> Simple version of the UNIX find program.
+-> Finds all the files in a directory tree with a specific name.
+
+[lab1] xargs (user/xargs.c)
+-> Simple version of the UNIX xargs program.
+-> Its arguments describe a command to run, it reads lines from the standard input,
+   and it runs the command for each line, appending the line to the command's arguments.
 
 [*] clear
 -> Traditional terminal function to clear previous content.
