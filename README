@@ -60,5 +60,5 @@ Added features:
    depth in the tree.
 
 TO-DO:
--> Add shell command history feature with arrows
--> Print current working directory in shell
+-> Add shell command history feature with arrows.
+-> Print current working directory in shell.
